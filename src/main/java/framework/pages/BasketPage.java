@@ -1,5 +1,6 @@
 package framework.pages;
 
+import framework.Product;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -35,13 +36,16 @@ public class BasketPage extends BasePage {
 
     //Проверка выбора доп. гарантии
     public BasketPage checkWarranty(String productName) {
-        for (WebElement block: productBlock){
-            if(block.getAttribute("innerText").contains(productName)) {
-                Assert.assertEquals("Неверное значение гарантии у продукта '" + productName + "'",
-                        ps5.getWarranty(), block.findElement(By.xpath(checkBtnWarranty)).getAttribute("innerText"));
+        for (Product product : productList){
+            if(product.getWarranty() != null){
+                for (WebElement block: productBlock){
+                    if(block.getAttribute("innerText").contains(productName)) {
+                        Assert.assertEquals("Неверное значение гарантии у продукта '" + productName + "'",
+                                product.getWarranty(), block.findElement(By.xpath(checkBtnWarranty)).getAttribute("innerText"));
+                    }
+                }
             }
         }
-
         return this;
     }
 
@@ -61,6 +65,7 @@ public class BasketPage extends BasePage {
                 basket.setTotalPrice(basket.getTotalPrice() -
                         (Integer.parseInt(block.findElement(By.xpath(".//span[@class='price__current']")).getAttribute("innerText").replaceAll("\\D", ""))));
                 basket.setQuantity(basket.getQuantity()-1);
+                basket.setDeleteProdName(productName);
             }
         }
         wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//div[@class='cart-items__content-container']"), basket.getQuantity()));
@@ -69,33 +74,45 @@ public class BasketPage extends BasePage {
 
     //Увелиение количества выбранного продукта
     public BasketPage addQuantityProduct(String productName, String value) {
-        for (WebElement setPlus:productBlock) {
-            if (setPlus.getAttribute("innerText").contains(productName)) {
-                scrollToElementJs(addProduct);
-                js.executeScript("arguments[0].click();", addProduct);
-                addProduct.clear();
-                addProduct.sendKeys(value);
-                addProduct.sendKeys(Keys.ENTER);
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException ignore) { }
-                Assert.assertEquals("Значение общей суммы в корзине неверно",
-                        (ps5.getOptionsPrice()*Integer.parseInt(value)), getIntBasketPrice(totalPrice));
-                basket.setTotalPrice(getIntBasketPrice(totalPrice));
-                return this;
+        for (Product product: productList) {
+            for (WebElement setPlus:productBlock) {
+                if (setPlus.getAttribute("innerText").contains(productName)) {
+                    scrollToElementJs(addProduct);
+                    js.executeScript("arguments[0].click();", addProduct);
+                    addProduct.clear();
+                    addProduct.sendKeys(value);
+                    addProduct.sendKeys(Keys.ENTER);
+                    if (setPlus.getAttribute("innerText").contains(product.getName())) {
+                        basket.setTotalPrice(basket.getTotalPrice() - product.getPrice());
+                        product.setPrice(product.getPrice() * Integer.parseInt(value));
+                        basket.setTotalPrice(basket.getTotalPrice() + product.getPrice());
+                        return this;
+                    }
+                }
             }
         }
+        Assert.assertEquals("Значение общей суммы в корзине неверно",
+                basket.getTotalPrice(), getIntBasketPrice(totalPrice));
         return this;
     }
 
     //Вернуть удаленный товар
     public BasketPage restoreProduct() {
+        waitUtilElementToBeVisible(restoreBtnProduct);
         if (restoreBtnProduct.isDisplayed()) {
-            waitUtilElementToBeVisible(restoreBtnProduct).click();
+            waitUtilElementToBeClickable(restoreBtnProduct).click();
             basket.setQuantity(basket.getQuantity() + 1);
             wait.until(ExpectedConditions.numberOfElementsToBe(By.xpath("//div[@class='cart-items__content-container']"), basket.getQuantity()));
+
+            for (Product product : productList) {
+                String a = product.getName();
+                if (product.getName().contains(basket.getDeleteProdName())) {
+                    basket.setTotalPrice(basket.getTotalPrice() + product.getPrice());
+                    return this;
+                }
+            }
             Assert.assertEquals("Удаленный товар не был возвращен в корзину",
-                    basket.getTotalPrice() + fc6.getPrice(), getIntBasketPrice(totalPrice));
+                    basket.getTotalPrice(), getIntBasketPrice(totalPrice));
             return this;
         }
         Assert.fail("Кнопка 'Вернуть удалённый товар' отсутствует");

@@ -1,20 +1,24 @@
 package framework;
 
+import java.util.ArrayList;
+
 public class Product {
 
-    String name;
-    int price;
-    int optionsPrice;
-    String warranty;
-    String description;
-    int quantity;
+    private int id = 0;
+    private String name;
+    private int price;
+    private String warranty;
+    private String description;
 
-    public int getQuantity() {
-        return quantity;
+    public Product(int id, String name, int price, String warranty, String description) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.warranty = warranty;
+        this.description = description;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public Product() {
     }
 
     public String getName() {
@@ -33,14 +37,6 @@ public class Product {
         this.price = price;
     }
 
-    public int getOptionsPrice() {
-        return optionsPrice;
-    }
-
-    public void setOptionsPrice(int optionsPrice) {
-        this.optionsPrice = optionsPrice;
-    }
-
     public String getWarranty() {
         return warranty;
     }
@@ -55,5 +51,13 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

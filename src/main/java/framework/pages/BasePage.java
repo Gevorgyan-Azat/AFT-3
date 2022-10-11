@@ -11,6 +11,8 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.ArrayList;
+
 public class BasePage {
 
     protected DriverManager driverManager = DriverManager.getINSTANCE();
@@ -18,9 +20,11 @@ public class BasePage {
     protected PageManager pageManager = PageManager.getINSTANCE();
     protected JavascriptExecutor js = (JavascriptExecutor)driverManager.getDriver();
 
-    protected static Product ps5 = new Product();
-    protected static Product fc6 = new Product();
+//    protected static Product ps5 = new Product();
+//    protected static Product fc6 = new Product();
+    protected static Product pr = new Product();
     protected static Basket basket = new Basket();
+    protected static ArrayList<Product> productList = new ArrayList<>();
 
     public BasePage() {
         PageFactory.initElements(driverManager.getDriver(), this);

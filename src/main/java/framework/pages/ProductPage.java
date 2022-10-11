@@ -1,5 +1,6 @@
 package framework.pages;
 
+import framework.Product;
 import org.junit.Assert;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -42,17 +43,26 @@ public class ProductPage extends BasePage {
     private WebElement basketBlockDisplay;
 
 
-    public ProductPage setPS5Param() {
-        ps5.setName(productName.getText());
-        ps5.setPrice(getIntProductPrice(productPrice));
-        ps5.setDescription(productDescription.getText());
-        return this;
-    }
+//    public ProductPage setPS5Param() {
+//        ps5.setName(productName.getText());
+//        ps5.setPrice(getIntProductPrice(productPrice));
+//        ps5.setDescription(productDescription.getText());
+//        return this;
+//    }
+//
+//    public ProductPage setFC6Param() {
+//        fc6.setName(productName.getText());
+//        fc6.setPrice(getIntProductPrice(productPrice));
+//        fc6.setDescription(productDescription.getText());
+//        return this;
+//    }
 
-    public ProductPage setFC6Param() {
-        fc6.setName(productName.getText());
-        fc6.setPrice(getIntProductPrice(productPrice));
-        fc6.setDescription(productDescription.getText());
+    public ProductPage setProdParam(){
+        pr.setId(pr.getId()+1);
+        pr.setName(productName.getText());
+        pr.setPrice(getIntProductPrice(productPrice));
+        pr.setDescription(productDescription.getText());
+        productList.add(new Product(pr.getId(), pr.getName(), pr.getPrice(), pr.getWarranty(), pr.getDescription()));
         return this;
     }
 
@@ -63,11 +73,13 @@ public class ProductPage extends BasePage {
         for (WebElement setWarranty:btnWarranty) {
             if (setWarranty.getText().equalsIgnoreCase(value)) {
                 waitUtilElementToBeClickable(setWarranty).click();
-                ps5.setWarranty(value);
-                if (ps5.getPrice()> ps5.getOptionsPrice()) {
-                    ps5.setOptionsPrice(getIntProductPrice(productPrice));
+                for (Product product: productList) {
+                    if(product.getName().equalsIgnoreCase(productName.getText())){
+                        product.setWarranty(value);
+                        product.setPrice(getIntProductPrice(productPrice));
+                        return this;
+                    }
                 }
-                return this;
             }
         }
         Assert.fail("Гарантия со значением " + value + " не найдена");
@@ -78,8 +90,12 @@ public class ProductPage extends BasePage {
     public ProductPage buyProduct() {
         waitUtilElementToBeClickable(btnBuy).click();
         waitUtilElementToBeVisible(basketBlockDisplay);
-        basket.setTotalPrice(ps5.getOptionsPrice() + fc6.getPrice());
-        basket.setQuantity(basket.getQuantity()+1);
+        for (Product product: productList) {
+            if (product.getName().equalsIgnoreCase(productName.getText())) {
+                basket.setTotalPrice(basket.getTotalPrice() + product.getPrice());
+                basket.setQuantity(basket.getQuantity() + 1);
+            }
+        }
         return this;
     }
 

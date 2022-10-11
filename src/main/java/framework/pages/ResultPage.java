@@ -19,7 +19,7 @@ public class ResultPage extends BasePage {
     public ProductPage selectProduct(String productName) {
         waitUtilElementToBeVisible(productBlock);
         for (WebElement product : products) {
-            if (product.getText().equalsIgnoreCase(productName)) {
+            if (product.getText().contains(productName)) {
                 scrollToElementJs(product);
                 js.executeScript("arguments[0].click();", product);
                 return pageManager.getProductPage();
